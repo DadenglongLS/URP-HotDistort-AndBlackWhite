@@ -36,10 +36,14 @@ public class GrabTexRenderFeature : ScriptableRendererFeature
             var cmd = CommandBufferPool.Get(s_RenderTag);
             Render(cmd, ref renderingData);
             context.ExecuteCommandBuffer(cmd);
+            cmd.Clear();
             CommandBufferPool.Release(cmd);
         }
         public void Render(CommandBuffer cmd, ref RenderingData renderingData)
         {
+            var enablePost = renderingData.cameraData.postProcessEnabled;
+            if (!enablePost) return;
+
             RenderTargetIdentifier sourceRT = renderingData.cameraData.renderer.cameraColorTarget;
             int tempID = Shader.PropertyToID("_GrabTemp");
             cmd.GetTemporaryRT(tempID, 1920, 1080, 0, FilterMode.Bilinear, RenderTextureFormat.DefaultHDR);
