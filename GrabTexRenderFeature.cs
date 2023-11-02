@@ -24,7 +24,7 @@ public class GrabTexRenderFeature : ScriptableRendererFeature
     public class GrabPass : ScriptableRenderPass
     {
         private static readonly string s_RenderTag = " Distort Source Texture";
-        private RenderTargetIdentifier m_BlurTex;
+        // private RenderTargetIdentifier m_BlurTex;
         private RenderTargetIdentifier m_Temp;
         public GrabPass(RenderPassEvent evt)
         {
@@ -41,13 +41,18 @@ public class GrabTexRenderFeature : ScriptableRendererFeature
         }
         public void Render(CommandBuffer cmd, ref RenderingData renderingData)
         {
-            var enablePost = renderingData.cameraData.postProcessEnabled;
-            if (!enablePost) return;
-
             RenderTargetIdentifier sourceRT = renderingData.cameraData.renderer.cameraColorTarget;
-            int tempID = Shader.PropertyToID("_GrabTemp");
-            cmd.GetTemporaryRT(tempID, 1920, 1080, 0, FilterMode.Bilinear, RenderTextureFormat.DefaultHDR);
+            RenderTextureDescriptor inRTDesc = renderingData.cameraData.cameraTargetDescriptor;
+            inRTDesc.depthBufferBits = 0;
 
+            var width = (int)(inRTDesc.width);
+            var height = (int)(inRTDesc.height);
+            int tempID = Shader.PropertyToID("_GrabTemp");
+            // int blurTexID = Shader.PropertyToID("_DistortTex");
+            cmd.GetTemporaryRT(tempID, width, height, 0, FilterMode.Bilinear, RenderTextureFormat.DefaultHDR);
+            // cmd.GetTemporaryRT(blurTexID, inRTDesc);
+
+            // m_BlurTex = new RenderTargetIdentifier(blurTexID);
             m_Temp = new RenderTargetIdentifier(tempID);
 
             cmd.Blit(sourceRT, m_Temp);
